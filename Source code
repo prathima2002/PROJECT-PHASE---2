@@ -1,0 +1,417 @@
+
+Machine learning model for prediction of smartphone addiction
+Import Statements
+import pandas as pd
+from matplotlib import pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+read The Dataset
+# read The csv file
+df = pd.read_csv("20230329093832Mobile-Addiction-.csv")
+# Show The First Five Row
+df.head()
+Timestamp	Full Name :	Gender :	Do you use your phone to click pictures of class notes?	Do you buy books/access books from your mobile?	Does your phone's battery last a day?	When your phone's battery dies out, do you run for the charger?	Do you worry about losing your cell phone?	Do you take your phone to the bathroom?	Do you use your phone in any social gathering (parties)?	...	Do you check your phone just before going to sleep/just after waking up?	Do you keep your phone right next to you while sleeping?	Do you check emails, missed calls, texts during class time?	Do you find yourself relying on your phone when things get awkward?	Are you on your phone while watching TV or eating food?	Do you have a panic attack if you leave your phone elsewhere?	You don't mind responding to messages or checking your phone while on date?	For how long do you use your phone for playing games?	Can you live a day without phone ?	whether you are addicted to phone?
+0	2023/02/17 2:21:53 PM GMT+5:30	Dabbeta Ganesh Kumar	MALE	Yes	Yes	Yes	Yes;No	Yes	Yes	Yes	...	Yes	Yes	Yes	Yes	Yes	Yes	Yes	<2 hours	NaN	NaN
+1	2023/02/24 4:28:34 PM GMT+5:30	Mir Junaid Rasool	MALE	Yes	No	Yes	Yes	Yes	Yes	Yes	...	Yes	Yes	No	Yes	No	Yes	Yes	<2 hours	No	Maybe
+2	2023/02/24 4:34:02 PM GMT+5:30	Dev	MALE	Yes	No	No	Yes	Yes	Yes	Yes	...	Yes	Yes	No	Yes	Yes	Yes	Yes	>2 hours	No	Yes
+3	2023/02/27 3:32:22 PM GMT+5:30	A.RuthvikDev	MALE	Yes	No	Yes	Yes	Yes	No	Yes	...	Yes	Yes	Yes	Yes	No	Yes	No	<2 hours	Yes	No
+4	2023/02/27 3:33:44 PM GMT+5:30	Vishnu	MALE	Yes	Yes	Yes	Yes	Yes	No	Yes	...	Yes	NaN	No	No	No	No	No	<2 hours	Yes	No
+5 rows × 21 columns
+
+# Show The Last Five Row
+df.tail()
+Timestamp	Full Name :	Gender :	Do you use your phone to click pictures of class notes?	Do you buy books/access books from your mobile?	Does your phone's battery last a day?	When your phone's battery dies out, do you run for the charger?	Do you worry about losing your cell phone?	Do you take your phone to the bathroom?	Do you use your phone in any social gathering (parties)?	...	Do you check your phone just before going to sleep/just after waking up?	Do you keep your phone right next to you while sleeping?	Do you check emails, missed calls, texts during class time?	Do you find yourself relying on your phone when things get awkward?	Are you on your phone while watching TV or eating food?	Do you have a panic attack if you leave your phone elsewhere?	You don't mind responding to messages or checking your phone while on date?	For how long do you use your phone for playing games?	Can you live a day without phone ?	whether you are addicted to phone?
+496	2023/03/28 2:36:46 PM GMT+5:30	Sahadev	MALE	No	No	No	Yes	No	No	No	...	Yes	Yes	No	No	Yes	Yes	No	<2 hours	Yes	No
+497	2023/03/28 2:37:54 PM GMT+5:30	Chandra	MALE	Yes	No	Yes	Yes	No	Yes	Yes	...	Yes	Yes	Yes	No	Yes	Yes	Yes	>2 hours	Yes	No
+498	2023/03/28 2:38:26 PM GMT+5:30	Laxman	MALE	No	No	Yes	Yes	Yes	No	Yes	...	No	No	Yes	No	Yes	No	Yes	>2 hours	Yes	Yes
+499	2023/03/28 2:39:19 PM GMT+5:30	Sheri mohan	MALE	Yes	Yes	No	Yes	No	Yes	Yes	...	Yes	Yes	No	Yes	Yes	No	Yes	>2 hours	Yes	No
+500	2023/03/28 2:39:59 PM GMT+5:30	Puri jaganath	MALE	Yes	Yes	No	Yes	Yes	Yes	Yes	...	NaN	NaN	Yes	Yes	Yes	Yes	Yes	>2 hours	No	Yes
+5 rows × 21 columns
+
+Informationn about Dataset
+# check The Datatype
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 501 entries, 0 to 500
+Data columns (total 21 columns):
+ #   Column                                                                        Non-Null Count  Dtype 
+---  ------                                                                        --------------  ----- 
+ 0   Timestamp                                                                     501 non-null    object
+ 1   Full Name :                                                                   496 non-null    object
+ 2   Gender :                                                                      500 non-null    object
+ 3   Do you use your phone to click pictures of class notes?                       499 non-null    object
+ 4   Do you buy books/access books from your mobile?                               499 non-null    object
+ 5   Does your phone's battery last a day?                                         498 non-null    object
+ 6   When your phone's battery dies out, do you run for the charger?               498 non-null    object
+ 7   Do you worry about losing your cell phone?                                    500 non-null    object
+ 8   Do you take your phone to the bathroom?                                       499 non-null    object
+ 9   Do you use your phone in any social gathering (parties)?                      500 non-null    object
+ 10  Do you often check your phone without any notification?                       500 non-null    object
+ 11  Do you check your phone just before going to sleep/just after waking up?      499 non-null    object
+ 12  Do you keep your phone right next to you while sleeping?                      498 non-null    object
+ 13  Do you check emails, missed calls, texts during class time?                   498 non-null    object
+ 14  Do you find yourself relying on your phone when things get awkward?           497 non-null    object
+ 15  Are you on your phone while watching TV or eating food?                       500 non-null    object
+ 16  Do you have a panic attack if you leave your phone elsewhere?                 500 non-null    object
+ 17  You don't mind responding to messages or checking your phone while on date?   496 non-null    object
+ 18  For how long do you use your phone for playing games?                         497 non-null    object
+ 19  Can you live a day without phone ?                                            499 non-null    object
+ 20  whether you are addicted to phone?                                            499 non-null    object
+dtypes: object(21)
+memory usage: 82.3+ KB
+# shape of The Dataset
+df.shape
+(501, 21)
+# Check The Null Values
+df.isnull().sum()
+Timestamp                                                                       0
+Full Name :                                                                     5
+Gender :                                                                        1
+Do you use your phone to click pictures of class notes?                         2
+Do you buy books/access books from your mobile?                                 2
+Does your phone's battery last a day?                                           3
+When your phone's battery dies out, do you run for the charger?                 3
+Do you worry about losing your cell phone?                                      1
+Do you take your phone to the bathroom?                                         2
+Do you use your phone in any social gathering (parties)?                        1
+Do you often check your phone without any notification?                         1
+Do you check your phone just before going to sleep/just after waking up?        2
+Do you keep your phone right next to you while sleeping?                        3
+Do you check emails, missed calls, texts during class time?                     3
+Do you find yourself relying on your phone when things get awkward?             4
+Are you on your phone while watching TV or eating food?                         1
+Do you have a panic attack if you leave your phone elsewhere?                   1
+You don't mind responding to messages or checking your phone while on date?     5
+For how long do you use your phone for playing games?                           4
+Can you live a day without phone ?                                              2
+whether you are addicted to phone?                                              2
+dtype: int64
+# Check The Duplicate Vlue
+df.duplicated()
+0      False
+1      False
+2      False
+3      False
+4      False
+       ...  
+496    False
+497    False
+498    False
+499    False
+500    False
+Length: 501, dtype: bool
+# Describe The Dataset
+df.describe()
+Timestamp	Full Name :	Gender :	Do you use your phone to click pictures of class notes?	Do you buy books/access books from your mobile?	Does your phone's battery last a day?	When your phone's battery dies out, do you run for the charger?	Do you worry about losing your cell phone?	Do you take your phone to the bathroom?	Do you use your phone in any social gathering (parties)?	...	Do you check your phone just before going to sleep/just after waking up?	Do you keep your phone right next to you while sleeping?	Do you check emails, missed calls, texts during class time?	Do you find yourself relying on your phone when things get awkward?	Are you on your phone while watching TV or eating food?	Do you have a panic attack if you leave your phone elsewhere?	You don't mind responding to messages or checking your phone while on date?	For how long do you use your phone for playing games?	Can you live a day without phone ?	whether you are addicted to phone?
+count	501	496	500	499	499	498	498	500	499	500	...	499	498	498	497	500	500	496	497	499	499
+unique	308	271	3	2	2	2	3	2	2	2	...	2	2	2	2	2	2	2	2	2	3
+top	2023/03/10 3:29:09 PM GMT+5:30	pawan	MALE	Yes	No	Yes	Yes	No	Yes	No	...	No	No	No	Yes	No	No	Yes	>2 hours	Yes	No
+freq	19	20	417	441	318	406	417	285	367	303	...	294	310	340	411	319	308	394	331	413	322
+4 rows × 21 columns
+
+# total null valus in Dataset
+df.isnull().sum().sum()
+48
+df.columns
+Index(['Timestamp', 'Full Name :', 'Gender :',
+       'Do you use your phone to click pictures of class notes?',
+       'Do you buy books/access books from your mobile?',
+       'Does your phone's battery last a day?',
+       'When your phone's battery dies out, do you run for the charger?',
+       'Do you worry about losing your cell phone?',
+       'Do you take your phone to the bathroom?',
+       'Do you use your phone in any social gathering (parties)?',
+       'Do you often check your phone without any notification? ',
+       'Do you check your phone just before going to sleep/just after waking up?',
+       'Do you keep your phone right next to you while sleeping?',
+       'Do you check emails, missed calls, texts during class time? ',
+       'Do you find yourself relying on your phone when things get awkward?',
+       'Are you on your phone while watching TV or eating food?',
+       'Do you have a panic attack if you leave your phone elsewhere?',
+       'You don't mind responding to messages or checking your phone while on date? ',
+       'For how long do you use your phone for playing games?',
+       'Can you live a day without phone ? ',
+       'whether you are addicted to phone?'],
+      dtype='object')
+df['whether you are addicted to phone?'].value_counts()
+No       322
+Yes      176
+Maybe      1
+Name: whether you are addicted to phone?, dtype: int64
+Preprocessing
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 501 entries, 0 to 500
+Data columns (total 21 columns):
+ #   Column                                                                        Non-Null Count  Dtype 
+---  ------                                                                        --------------  ----- 
+ 0   Timestamp                                                                     501 non-null    object
+ 1   Full Name :                                                                   496 non-null    object
+ 2   Gender :                                                                      500 non-null    object
+ 3   Do you use your phone to click pictures of class notes?                       499 non-null    object
+ 4   Do you buy books/access books from your mobile?                               499 non-null    object
+ 5   Does your phone's battery last a day?                                         498 non-null    object
+ 6   When your phone's battery dies out, do you run for the charger?               498 non-null    object
+ 7   Do you worry about losing your cell phone?                                    500 non-null    object
+ 8   Do you take your phone to the bathroom?                                       499 non-null    object
+ 9   Do you use your phone in any social gathering (parties)?                      500 non-null    object
+ 10  Do you often check your phone without any notification?                       500 non-null    object
+ 11  Do you check your phone just before going to sleep/just after waking up?      499 non-null    object
+ 12  Do you keep your phone right next to you while sleeping?                      498 non-null    object
+ 13  Do you check emails, missed calls, texts during class time?                   498 non-null    object
+ 14  Do you find yourself relying on your phone when things get awkward?           497 non-null    object
+ 15  Are you on your phone while watching TV or eating food?                       500 non-null    object
+ 16  Do you have a panic attack if you leave your phone elsewhere?                 500 non-null    object
+ 17  You don't mind responding to messages or checking your phone while on date?   496 non-null    object
+ 18  For how long do you use your phone for playing games?                         497 non-null    object
+ 19  Can you live a day without phone ?                                            499 non-null    object
+ 20  whether you are addicted to phone?                                            499 non-null    object
+dtypes: object(21)
+memory usage: 82.3+ KB
+# **fill a Null Values**
+col = df[['Timestamp', 'Full Name :', 'Gender :',
+       'Do you use your phone to click pictures of class notes?',
+       'Do you buy books/access books from your mobile?',
+       "Does your phone's battery last a day?",
+       "When your phone's battery dies out, do you run for the charger?",
+       'Do you worry about losing your cell phone?',
+       'Do you take your phone to the bathroom?',
+       'Do you use your phone in any social gathering (parties)?',
+       'Do you often check your phone without any notification? ',
+       'Do you check your phone just before going to sleep/just after waking up?',
+       'Do you keep your phone right next to you while sleeping?',
+       'Do you check emails, missed calls, texts during class time? ',
+       'Do you find yourself relying on your phone when things get awkward?',
+       'Are you on your phone while watching TV or eating food?',
+       'Do you have a panic attack if you leave your phone elsewhere?',
+       "You don't mind responding to messages or checking your phone while on date? ",
+       'For how long do you use your phone for playing games?',
+       'Can you live a day without phone ? ',
+       'whether you are addicted to phone?']]
+# filling a null Values applying a ffill method
+for i in col:
+    df[i].fillna(method='ffill',inplace=True)
+df['Can you live a day without phone ? '].fillna(method='bfill',inplace=True)
+df['whether you are addicted to phone?'].fillna(method='bfill',inplace=True)
+df.isnull().sum()
+Timestamp                                                                       0
+Full Name :                                                                     0
+Gender :                                                                        0
+Do you use your phone to click pictures of class notes?                         0
+Do you buy books/access books from your mobile?                                 0
+Does your phone's battery last a day?                                           0
+When your phone's battery dies out, do you run for the charger?                 0
+Do you worry about losing your cell phone?                                      0
+Do you take your phone to the bathroom?                                         0
+Do you use your phone in any social gathering (parties)?                        0
+Do you often check your phone without any notification?                         0
+Do you check your phone just before going to sleep/just after waking up?        0
+Do you keep your phone right next to you while sleeping?                        0
+Do you check emails, missed calls, texts during class time?                     0
+Do you find yourself relying on your phone when things get awkward?             0
+Are you on your phone while watching TV or eating food?                         0
+Do you have a panic attack if you leave your phone elsewhere?                   0
+You don't mind responding to messages or checking your phone while on date?     0
+For how long do you use your phone for playing games?                           0
+Can you live a day without phone ?                                              0
+whether you are addicted to phone?                                              0
+dtype: int64
+# before Label Encoding
+df.head()
+Timestamp	Full Name :	Gender :	Do you use your phone to click pictures of class notes?	Do you buy books/access books from your mobile?	Does your phone's battery last a day?	When your phone's battery dies out, do you run for the charger?	Do you worry about losing your cell phone?	Do you take your phone to the bathroom?	Do you use your phone in any social gathering (parties)?	...	Do you check your phone just before going to sleep/just after waking up?	Do you keep your phone right next to you while sleeping?	Do you check emails, missed calls, texts during class time?	Do you find yourself relying on your phone when things get awkward?	Are you on your phone while watching TV or eating food?	Do you have a panic attack if you leave your phone elsewhere?	You don't mind responding to messages or checking your phone while on date?	For how long do you use your phone for playing games?	Can you live a day without phone ?	whether you are addicted to phone?
+0	2023/02/17 2:21:53 PM GMT+5:30	Dabbeta Ganesh Kumar	MALE	Yes	Yes	Yes	Yes;No	Yes	Yes	Yes	...	Yes	Yes	Yes	Yes	Yes	Yes	Yes	<2 hours	No	Maybe
+1	2023/02/24 4:28:34 PM GMT+5:30	Mir Junaid Rasool	MALE	Yes	No	Yes	Yes	Yes	Yes	Yes	...	Yes	Yes	No	Yes	No	Yes	Yes	<2 hours	No	Maybe
+2	2023/02/24 4:34:02 PM GMT+5:30	Dev	MALE	Yes	No	No	Yes	Yes	Yes	Yes	...	Yes	Yes	No	Yes	Yes	Yes	Yes	>2 hours	No	Yes
+3	2023/02/27 3:32:22 PM GMT+5:30	A.RuthvikDev	MALE	Yes	No	Yes	Yes	Yes	No	Yes	...	Yes	Yes	Yes	Yes	No	Yes	No	<2 hours	Yes	No
+4	2023/02/27 3:33:44 PM GMT+5:30	Vishnu	MALE	Yes	Yes	Yes	Yes	Yes	No	Yes	...	Yes	Yes	No	No	No	No	No	<2 hours	Yes	No
+5 rows × 21 columns
+
+# Apply The Label Encoding
+le = LabelEncoder()
+for i in col:
+    df[i]=le.fit_transform(df[i])
+# After Label Encoding
+df.head()
+Timestamp	Full Name :	Gender :	Do you use your phone to click pictures of class notes?	Do you buy books/access books from your mobile?	Does your phone's battery last a day?	When your phone's battery dies out, do you run for the charger?	Do you worry about losing your cell phone?	Do you take your phone to the bathroom?	Do you use your phone in any social gathering (parties)?	...	Do you check your phone just before going to sleep/just after waking up?	Do you keep your phone right next to you while sleeping?	Do you check emails, missed calls, texts during class time?	Do you find yourself relying on your phone when things get awkward?	Are you on your phone while watching TV or eating food?	Do you have a panic attack if you leave your phone elsewhere?	You don't mind responding to messages or checking your phone while on date?	For how long do you use your phone for playing games?	Can you live a day without phone ?	whether you are addicted to phone?
+0	0	43	1	1	1	1	2	1	1	1	...	1	1	1	1	1	1	1	0	0	0
+1	1	110	1	1	0	1	1	1	1	1	...	1	1	0	1	0	1	1	0	0	0
+2	2	46	1	1	0	0	1	1	1	1	...	1	1	0	1	1	1	1	1	0	2
+3	11	1	1	1	0	1	1	1	0	1	...	1	1	1	1	0	1	0	0	1	1
+4	12	250	1	1	1	1	1	1	0	1	...	1	1	0	0	0	0	0	0	1	1
+5 rows × 21 columns
+
+df['whether you are addicted to phone?'].value_counts()
+1    322
+2    177
+0      2
+Name: whether you are addicted to phone?, dtype: int64
+EDA
+# Histplot of every column in dataset
+df1=df.select_dtypes(exclude=['object','bool'])
+for column in df1:
+        plt.figure(figsize=(17,1))
+        sns.histplot(data=df1, x=column)
+plt.show()
+C:\Users\ymts0630\AppData\Local\Temp\ipykernel_10068\2907715040.py:4: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  plt.figure(figsize=(17,1))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# countplot of every column in dataset
+df1=df.select_dtypes(exclude=['object','bool'])
+for column in df1:
+        plt.figure(figsize=(17,1))
+        sns.countplot(data=df1, x=column)
+plt.show()
+C:\Users\ymts0630\AppData\Local\Temp\ipykernel_10068\1802899625.py:4: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  plt.figure(figsize=(17,1))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 501 entries, 0 to 500
+Data columns (total 21 columns):
+ #   Column                                                                        Non-Null Count  Dtype
+---  ------                                                                        --------------  -----
+ 0   Timestamp                                                                     501 non-null    int32
+ 1   Full Name :                                                                   501 non-null    int32
+ 2   Gender :                                                                      501 non-null    int32
+ 3   Do you use your phone to click pictures of class notes?                       501 non-null    int32
+ 4   Do you buy books/access books from your mobile?                               501 non-null    int32
+ 5   Does your phone's battery last a day?                                         501 non-null    int32
+ 6   When your phone's battery dies out, do you run for the charger?               501 non-null    int32
+ 7   Do you worry about losing your cell phone?                                    501 non-null    int32
+ 8   Do you take your phone to the bathroom?                                       501 non-null    int32
+ 9   Do you use your phone in any social gathering (parties)?                      501 non-null    int32
+ 10  Do you often check your phone without any notification?                       501 non-null    int32
+ 11  Do you check your phone just before going to sleep/just after waking up?      501 non-null    int32
+ 12  Do you keep your phone right next to you while sleeping?                      501 non-null    int32
+ 13  Do you check emails, missed calls, texts during class time?                   501 non-null    int32
+ 14  Do you find yourself relying on your phone when things get awkward?           501 non-null    int32
+ 15  Are you on your phone while watching TV or eating food?                       501 non-null    int32
+ 16  Do you have a panic attack if you leave your phone elsewhere?                 501 non-null    int32
+ 17  You don't mind responding to messages or checking your phone while on date?   501 non-null    int32
+ 18  For how long do you use your phone for playing games?                         501 non-null    int32
+ 19  Can you live a day without phone ?                                            501 non-null    int32
+ 20  whether you are addicted to phone?                                            501 non-null    int32
+dtypes: int32(21)
+memory usage: 41.2 KB
+# Target column lineplot
+sns.lineplot(df["whether you are addicted to phone?"])
+<Axes: ylabel='whether you are addicted to phone?'>
+
+# Target column lineplot
+sns.histplot(df["whether you are addicted to phone?"])
+<Axes: xlabel='whether you are addicted to phone?', ylabel='Count'>
+
+# target column kdeplot
+sns.kdeplot(df["whether you are addicted to phone?"])
+<Axes: xlabel='whether you are addicted to phone?', ylabel='Density'>
+
+# pairplot of every column in dataset
+sns.pairplot(df)
+<seaborn.axisgrid.PairGrid at 0x24844774490>
+
+Split The Data
+# Delete The unknown column
+df.drop('Timestamp', axis = 1,inplace = True)
+x = df.drop(['whether you are addicted to phone?'], axis = 1) 
+y = df['whether you are addicted to phone?']
+Oversample = RandomOverSampler(random_state=72)
+x_sm, y_sm = Oversample.fit_resample(x[:100],y[:100])
+x_train, x_test, y_train, y_test = train_test_split(x_sm, y_sm, test_size = 0.3, random_state= 72)
+x_train.shape
+(136, 19)
+x_test.shape
+(59, 19)
+y_train.shape
+(136,)
+y_test.shape
+(59,)
+Module Train
+RendomForestClasifier
+from sklearn.ensemble import RandomForestClassifier
+re = RandomForestClassifier(random_state=72)
+re.fit(x_train,y_train)
+re_pred = re.predict(x_test)
+ac = accuracy_score(y_test,re_pred)
+ac
+0.7796610169491526
+DecisionTreeClasifier
+from sklearn.tree import DecisionTreeClassifier
+de = DecisionTreeClassifier()
+de.fit(x_train,y_train)
+de_pred = de.predict(x_test)
+ac1 = accuracy_score(y_test,de_pred)
+ac1
+0.7627118644067796
+Logistic Regration
+from sklearn.linear_model import LogisticRegression
+le = LogisticRegression()
+le.fit(x_train,y_train)
+le_pred = le.predict(x_test)
+ac2 = accuracy_score(y_test,le_pred)
+ac2
+C:\Users\ymts0630\AppData\Roaming\Python\Python310\site-packages\sklearn\linear_model\_logistic.py:458: ConvergenceWarning: lbfgs failed to converge (status=1):
+STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
+
+Increase the number of iterations (max_iter) or scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+  n_iter_i = _check_optimize_result(
+0.7457627118644068
+Accuracy graph
+graph = pd.DataFrame({'Modules':['RendomForestClasifier','DecisionTreeClassifier','Logistic Regration'],
+          'Accuracy':[ac*100,ac1*100,ac2*100]})
+graph
+Modules	Accuracy
+0	RendomForestClasifier	77.966102
+1	DecisionTreeClassifier	74.576271
+2	Logistic Regration	74.576271
+plt.figure(figsize=(7,6))
+sns.barplot(y=graph.Accuracy,x=graph.Modules)
+plt.xticks(rotation='vertical')
+plt.show()
+
+ 
